@@ -1,0 +1,22 @@
+#name: Fetch Gold News
+#on:
+#  schedule:
+#    - cron: '*/30 * * * *'
+#  workflow_dispatch:
+#jobs:
+#  run-script:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: actions/setup-node@v4
+#        with:
+#          node-version: '20'
+#      - name: Install
+#        run: npm install
+#      - name: DB Generate
+#        run: npx prisma generate
+#      - name: Execute
+#        env:
+#          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+#          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+#        run: npx ts-node scripts/fetch-gold-news.ts
