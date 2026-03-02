@@ -59,7 +59,7 @@ async function run() {
         // Tìm tin đã tồn tại trong khung giờ này
         const existingNews = await prisma.news.findFirst({
             where: {
-                createdAt: { gte: startOfSlot, lte: endOfSlot },
+                createdAt: {gte: startOfSlot, lte: endOfSlot},
                 author: "giavang24"
             }
         });
@@ -81,72 +81,72 @@ async function run() {
         } else {
             console.log(`🆕 Chưa có tin cho khung ${slot.name}. Đang tạo mới...`);
         }
-    console.log("🚀 Đang tổng hợp bản tin duy nhất (bao gồm shortVi)...");
-    try {
-        const result = await genAI.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: [{ role: "user", parts: [{ text: GOLD_SEARCH_QUERY }] }],
-            config: {
-                systemInstruction: GEMINI_SYSTEM_INSTRUCTIONS,
-                tools: [{ googleSearch: {} }],
-                temperature: 0.3
+        console.log("🚀 Đang tổng hợp bản tin duy nhất (bao gồm shortVi)...");
+        try {
+            const result = await genAI.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: [{role: "user", parts: [{text: GOLD_SEARCH_QUERY}]}],
+                config: {
+                    systemInstruction: GEMINI_SYSTEM_INSTRUCTIONS,
+                    tools: [{googleSearch: {}}],
+                    temperature: 0.3
+                }
+            });
+
+            const responseText = result.text;
+            if (!responseText) throw new Error("Empty response from Gemini");
+
+            const cleanJson = responseText.replace(/```json|```/g, "").trim();
+            const parsed = JSON.parse(cleanJson);
+            const item = Array.isArray(parsed.news) ? parsed.news[0] : parsed.news;
+
+            if (!item || !item.headline) return;
+
+            const hash = crypto.createHash("md5").update(item.headline).digest("hex");
+            const existing = await prisma.news.findUnique({where: {hash}});
+
+            if (!existing) {
+                const slug = await generateDailySlug();
+
+                await prisma.news.create({
+                    data: {
+                        headlineVi: item.headline,
+                        headlineEn: item.headline,
+                        shortVi: item.short,           // ✅ Đã thêm shortVi
+                        shortEn: item.short,           // ✅ Đã thêm shortVi
+                        contentVi: item.content,       // HTML chi tiết
+                        contentEn: item.content,       // HTML chi tiết
+                        metaDesc: item.metaDesc,
+                        slugVi: slug,
+                        slugEn: slug,
+                        tags: item.tags,
+                        keywords: item.tags,
+                        hash: hash,
+                        author: "giavang24",
+                        pageCited: "Giavang24",
+                        category: "DOMESTIC",
+                        active: true,
+                        detailLink: `https://giavang24.vn/tin-tuc/${slug}`
+                    }
+                });
+                console.log(`✅ Xuất bản: ${slug}`);
+            } else {
+                console.log(`🔄 Cập nhật bài cũ: ${existing.slugVi}`);
+                await prisma.news.update({
+                    where: {hash},
+                    data: {
+                        shortVi: item.short,
+                        shortEn: item.short,
+                        contentVi: item.content,       // HTML chi tiết
+                        contentEn: item.content,       // HTML chi tiết
+                    }
+                });
             }
-        });
-
-        const responseText = result.text;
-        if (!responseText) throw new Error("Empty response from Gemini");
-
-        const cleanJson = responseText.replace(/```json|```/g, "").trim();
-        const parsed = JSON.parse(cleanJson);
-        const item = Array.isArray(parsed.news) ? parsed.news[0] : parsed.news;
-
-        if (!item || !item.headline) return;
-
-        const hash = crypto.createHash("md5").update(item.headline).digest("hex");
-        const existing = await prisma.news.findUnique({ where: { hash } });
-
-        if (!existing) {
-            const slug = await generateDailySlug();
-
-            await prisma.news.create({
-                data: {
-                    headlineVi: item.headline,
-                    headlineEn: item.headline,
-                    shortVi: item.short,           // ✅ Đã thêm shortVi
-                    shortEn: item.short,           // ✅ Đã thêm shortVi
-                    contentVi: item.content,       // HTML chi tiết
-                    contentEn: item.content,       // HTML chi tiết
-                    metaDesc: item.metaDesc,
-                    slugVi: slug,
-                    slugEn: slug,
-                    tags: item.tags,
-                    keywords: item.tags,
-                    hash: hash,
-                    author: "giavang24",
-                    pageCited: "Giavang24",
-                    category: "DOMESTIC",
-                    active: true,
-                    detailLink: `https://giavang24.vn/tin-tuc/${slug}`
-                }
-            });
-            console.log(`✅ Xuất bản: ${slug}`);
-        } else {
-            console.log(`🔄 Cập nhật bài cũ: ${existing.slugVi}`);
-            await prisma.news.update({
-                where: { hash },
-                data: {
-                    shortVi: item.short,
-                    shortEn: item.short,
-                    contentVi: item.content,       // HTML chi tiết
-                    contentEn: item.content,       // HTML chi tiết
-                }
-            });
+        } catch (e) {
+            console.error("❌ Lỗi:", e);
+        } finally {
+            await prisma.$disconnect();
         }
-    } catch (e) {
-        console.error("❌ Lỗi:", e);
-    } finally {
-        await prisma.$disconnect();
     }
 }
-
 run();
