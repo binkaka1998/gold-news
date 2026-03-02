@@ -63,7 +63,7 @@ async function run() {
         console.log(`🚀 Đang gọi Gemini cho khung giờ ${slot.name}...`);
 
         const result = await genAI.models.generateContent({
-            model: "gemini-2.5-flash", // Khuyên dùng 2.0-flash ổn định hơn
+            model: "gemini-2.5-flash",
             contents: [{ role: "user", parts: [{ text: GOLD_SEARCH_QUERY }] }],
             config: {
                 systemInstruction: GEMINI_SYSTEM_INSTRUCTIONS,
