@@ -52,7 +52,8 @@ async function run() {
                 console.log(`✅ Khung ${slot.name} đã có tin. Chờ đến giờ cập nhật.`);
                 return;
             }
-            const timeSinceLastUpdate = now.getTime() - new Date(existingNews.updatedAt).getTime();
+            const lastUpdateDate = existingNews.updatedAt ? new Date(existingNews.updatedAt) : new Date(existingNews.createdAt);
+            const timeSinceLastUpdate = now.getTime() - lastUpdateDate.getTime();
             if (timeSinceLastUpdate < 60 * 60 * 1000) {
                 console.log(`⏳ Bản tin ${slot.name} vừa cập nhật cách đây < 1 tiếng. Bỏ qua.`);
                 return;
