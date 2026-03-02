@@ -1,22 +1,45 @@
-#name: Fetch Gold News
-#on:
-#  schedule:
-#    - cron: '*/30 * * * *'
-#  workflow_dispatch:
-#jobs:
-#  run-script:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: actions/setup-node@v4
-#        with:
-#          node-version: '20'
-#      - name: Install
-#        run: npm install
-#      - name: DB Generate
-#        run: npx prisma generate
-#      - name: Execute
-#        env:
-#          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-#          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-#        run: npx ts-node scripts/fetch-gold-news.ts
+name: Giavang24 Auto Fetch News
+
+on:
+  schedule:
+    # Chạy mỗi 15 phút một lần
+    # Khung giờ chạy (UTC): 0h-3h (7h-10h VN), 4h-11h (11h-18h VN)
+    - cron: '*/15 0-3,4-11 * * *'
+  workflow_dispatch: # Cho phép bấm nút chạy thủ công trên GitHub để kiểm tra
+
+jobs:
+  fetch-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run Gold News Script
+        env:
+          # Các biến bí mật (Secrets) cần cài đặt trong GitHub Repo Settings
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Ép môi trường chạy theo múi giờ Việt Nam để logic Code chính xác
+          TZ: 'Asia/Ho_Chi_Minh'
+        run: npx ts-node scripts/fetch-gold-news.ts
+
+      - name: Success Notification
+        if: success()
+        run: echo "✅ Bản tin Giavang24 đã được kiểm tra và xử lý thành công."
+
+      - name: Failure Notification
+        if: failure()
+        run: echo "❌ Có lỗi xảy ra trong quá trình quét tin. Vui lòng kiểm tra Logs."
