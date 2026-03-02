@@ -34,7 +34,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           # Ép môi trường chạy theo múi giờ Việt Nam để logic Code chính xác
           TZ: 'Asia/Ho_Chi_Minh'
-        run: npx ts-node scripts/fetch-gold-news.ts
+        run: npm run fetch-news
 
       - name: Success Notification
         if: success()
