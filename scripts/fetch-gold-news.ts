@@ -126,7 +126,7 @@ async function run() {
                     pageCited: "Giavang24",
                     category: "DOMESTIC",
                     active: true,
-                    detailLink: `https://giavang24.vn/tin-tuc/${slug}`
+                    detailLink: `https://giavang24.com.vn/tin-tuc/${slug}`
                 }
             });
             console.log(`✨ Đã xuất bản tin mới: ${slug}`);
