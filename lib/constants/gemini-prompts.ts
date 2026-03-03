@@ -40,7 +40,7 @@ YÊU CẦU SCHEMA JSON:
   "news": [
     {
       "headline": "Tiêu đề bài viết tổng hợp hấp dẫn",
-      "short": Đoạn giới thiệu ngắn (3-5 câu) tóm tắt ý chính nhất, không dùng HTML.
+      "short": Đoạn giới thiệu ngắn (3-5 câu) tóm tắt ý chính nhất, không dùng HTML. Chia sáng trưa chiều theo thời gian được crawl, múi giờ UTC+7
       "content": "Toàn bộ nội dung bài viết định dạng HTML như mẫu",
       "metaDesc": "Mô tả SEO dưới 160 ký tự",
       "tags": ["giá vàng hôm nay", "tin vàng", "giá vàng ${new Date().toLocaleDateString('vi-VN')}", "vàng SJC", "vàng nhẫn 9999", "giá vàng thế giới", "phân tích vàng", "nhận định giá vàng", "giavang24"],
