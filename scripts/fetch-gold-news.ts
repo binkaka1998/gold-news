@@ -11,7 +11,7 @@ function getPublishingSlot() {
     const hour = now.getHours();
 
     // Khung 1: Sáng (7h-10h) - Update lúc 9h
-    if (hour >= 7 && hour < 10) return { id: 1, name: "SÁNG", start: 7, end: 10, canUpdate: hour >= 9 };
+    if (hour >= 6 && hour < 10) return { id: 1, name: "SÁNG", start: 6, end: 10, canUpdate: hour >= 9 };
     // Khung 2: Trưa (11h-15h) - Update lúc 14h
     if (hour >= 11 && hour < 15) return { id: 2, name: "TRƯA", start: 11, end: 15, canUpdate: hour >= 14 };
     // Khung 3: Chiều (15h-18h) - Update lúc 17h
