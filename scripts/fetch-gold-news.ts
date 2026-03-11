@@ -121,6 +121,7 @@ async function run() {
                     slugEn: slug.replace("tin-vang", "gold-news"),
                     tags: item.tags || [],
                     keywords: item.tags || [],
+                    socialEnabled: true,
                     hash: hash,
                     author: "giavang24",
                     pageCited: "Giavang24",

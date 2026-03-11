@@ -120,29 +120,52 @@ model CrawlerLog {
 }
 
 model News {
-  id          Int          @id @default(autoincrement())
-  headlineEn  String
-  headlineVi  String?
-  slugVi      String       @unique
-  slugEn      String       @unique
-  shortEn     String?      @db.Text
-  shortVi     String?      @db.Text
-  contentEn   String       @db.Text
-  contentVi   String?      @db.Text
-  detailLink  String       @unique
-  pageCited   String // 'VnExpress', 'Cafef' (domestic) or 'Kitco', 'DailyForex', 'MarketWatch' (international)
-  hash        String       @unique
-  active      Boolean      @default(false) // false = not published, true = published
-  category    NewsCategory @default(INTERNATIONAL)
-  tags        String[]     @default([]) // Empty for INTERNATIONAL
-  keywords    String[]     @default([]) // Empty for INTERNATIONAL
-  metaDesc    String? // NULL for INTERNATIONAL
-  author      String?
-  featured    Boolean      @default(false)
-  views       Int          @default(0)
-  publishedAt DateTime?    @default(now())
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime?    @updatedAt
+  id                 Int          @id @default(autoincrement())
+  headlineEn         String
+  headlineVi         String?
+  slugVi             String       @unique
+  slugEn             String       @unique
+  shortEn            String?      @db.Text
+  shortVi            String?      @db.Text
+  contentEn          String       @db.Text
+  contentVi          String?      @db.Text
+  detailLink         String       @unique
+  pageCited          String // 'VnExpress', 'Cafef' (domestic) or 'Kitco', 'DailyForex', 'MarketWatch' (international)
+  hash               String       @unique
+  active             Boolean      @default(false) // false = not published, true = published
+  category           NewsCategory @default(INTERNATIONAL)
+  tags               String[]     @default([]) // Empty for INTERNATIONAL
+  keywords           String[]     @default([]) // Empty for INTERNATIONAL
+  metaDesc           String? // NULL for INTERNATIONAL
+  author             String?
+  featured           Boolean      @default(false)
+  views              Int          @default(0)
+  publishedAt        DateTime?    @default(now())
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime?    @updatedAt
+  // --- Social publishing control ---
+  socialEnabled      Boolean      @default(false)
+  /// Atomic lock flag: set to true before processing, false after.
+  /// Prevents duplicate processing under concurrent cron runs.
+  socialProcessing   Boolean      @default(false)
+  socialProcessingAt DateTime? // When the lock was acquired (for stale-lock detection)
+
+  // --- Per-platform status flags ---
+  postedFacebook  Boolean @default(false)
+  postedInstagram Boolean @default(false)
+  postedThreads   Boolean @default(false)
+
+  // --- Per-platform post IDs (returned by each API) ---
+  facebookPostId   String?
+  instagramMediaId String?
+  threadsPostId    String?
+
+  // --- Error tracking ---
+  socialError      String? @db.Text
+  socialRetryCount Int     @default(0)
+
+  // --- Completion timestamp ---
+  socialPostedAt DateTime?
 
   @@index([pageCited])
   @@index([active])
@@ -150,6 +173,8 @@ model News {
   @@index([createdAt])
   @@index([slugVi])
   @@index([featured])
+  @@index([active, socialEnabled, socialProcessing, postedFacebook, postedInstagram, postedThreads])
+  @@index([socialProcessingAt]) // for stale lock cleanup
   @@map("news")
 }
 
