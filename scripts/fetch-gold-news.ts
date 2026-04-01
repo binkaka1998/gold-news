@@ -126,6 +126,7 @@ async function run() {
                     author: "giavang24",
                     pageCited: "Giavang24",
                     category: "DOMESTIC",
+                    featured: true,
                     active: true,
                     detailLink: `https://giavang24.com.vn/tin-tuc/${slug}`
                 }
